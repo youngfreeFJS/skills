@@ -71,6 +71,7 @@ Prepares a stable Node.js and npm environment for Appium by validating the activ
 ## Constraints
 - Prefer Node.js LTS versions only.
 - Do not assume global npm install privileges; provide local fallback.
+- Avoid using `sudo` in setup commands; prefer user-space tooling and local npm installs when permissions are restricted.
 - Always validate command availability immediately after installation.
 - Do not proceed to driver-specific setup until npm/Appium command checks pass.
 - Use deterministic terminal checks, not assumptions.
