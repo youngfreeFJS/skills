@@ -17,3 +17,8 @@ This repository contains AI Agent skills for preparing Appium driver environment
 - For long-running checks, prefer an isolated background terminal and capture output after completion.
 - If output appears incomplete, rerun only the affected step and collect logs from that step.
 - Treat Appium doctor as the source of truth for pass/fail (`0 required fixes needed`).
+
+## Agent Instructions
+
+- See [AGENTS.md](AGENTS.md) for strict execution rules and copy-paste prompt templates.
+- Use the template matching your target (`uiautomator2` or `xcuitest`) and run skills in the documented order.
