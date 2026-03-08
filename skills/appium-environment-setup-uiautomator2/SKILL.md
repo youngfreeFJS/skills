@@ -24,8 +24,17 @@ Prepares a reliable Appium UiAutomator2 execution environment by installing Node
 
 ## Instructions
 1. **Prepare Node.js + npm environment**
-   Run:
+   macOS/Linux:
    ```bash
+   node -v
+   npm -v
+   npm config get prefix
+   npm config get cache
+   npm ping
+   npm doctor
+   ```
+   Windows PowerShell:
+   ```powershell
    node -v
    npm -v
    npm config get prefix
@@ -63,12 +72,21 @@ Prepares a reliable Appium UiAutomator2 execution environment by installing Node
    Before UiAutomator2 doctor checks, execute `appium-android-environment-setup` and do not continue until it passes completion criteria.
 
 5. **Verify Android prerequisites from this skill context**
+   macOS/Linux:
    ```bash
    command -v adb
    adb version
    echo "$ANDROID_HOME"
    ls "$ANDROID_HOME/emulator/emulator"
    test -x "$ANDROID_HOME/emulator/emulator" && echo "emulator binary: OK"
+   ```
+   Windows PowerShell:
+   ```powershell
+   Get-Command adb.exe -ErrorAction SilentlyContinue
+   adb.exe version
+   $env:ANDROID_HOME
+   Test-Path "$env:ANDROID_HOME\emulator\emulator.exe"
+   if (Test-Path "$env:ANDROID_HOME\emulator\emulator.exe") { "emulator binary: OK" }
    ```
 
 6. **Run Appium doctor for UiAutomator2 and fix in a loop**
@@ -85,14 +103,36 @@ Prepares a reliable Appium UiAutomator2 execution environment by installing Node
    ```bash
    appium server
    ```
-   In another terminal:
+   Keep this server process running in Terminal A.
+   In Terminal B, run:
    ```bash
    curl -s http://127.0.0.1:4723/status
    ```
+   First confirm `/status` responds successfully from `curl`.
+   Then confirm startup/readiness from server logs and ensure the `Available drivers:` block contains `uiautomator2` (for example: `- uiautomator2@7.0.0 (automationName 'UiAutomator2')`).
    If using local Appium install:
    ```bash
    npx appium server
    ```
+   Keep this server process running in Terminal A.
+   In Terminal B, run:
+   ```bash
+   curl -s http://127.0.0.1:4723/status
+   ```
+   After smoke validation, clean up the running Appium server:
+   - In Terminal A, stop the server with `Ctrl+C`.
+    - Verify no leftover Appium server process (Terminal B, macOS/Linux):
+   ```bash
+   pgrep -fl "appium.*server" || echo "no appium server process"
+   ```
+    - Verify no leftover Appium server process (Terminal B, Windows PowerShell):
+    ```powershell
+    if (Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match 'appium.*server' }) {
+       Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match 'appium.*server' } | Select-Object ProcessId, Name, CommandLine
+    } else {
+       "no appium server process"
+    }
+    ```
 
 8. **Agent completion criteria**
    Mark the skill complete only when all are true:
@@ -101,12 +141,16 @@ Prepares a reliable Appium UiAutomator2 execution environment by installing Node
    - at least one Appium npm command mode works (`appium` or `npx appium`)
    - `appium driver doctor uiautomator2` has no failing mandatory checks
    - `appium-android-environment-setup` completion criteria are satisfied
-   - Appium status endpoint responds successfully
+   - `curl -s http://127.0.0.1:4723/status` returns a successful status response
+   - Appium server logs show startup/readiness successfully after the curl check
+   - Appium server logs include `Available drivers:` with a `uiautomator2` entry
+   - Appium smoke-test server process is cleanly stopped after validation
 
 ## Constraints
 - Always run `appium driver doctor uiautomator2` after each environment change.
 - Always validate npm environment (`npm doctor`) before driver installation.
 - Do not skip Android prerequisite validation; rely on `appium-android-environment-setup` for source-of-truth checks.
+- Use shell-appropriate commands (`bash` for macOS/Linux, PowerShell/cmd for Windows).
 - Treat optional doctor warnings as non-blocking.
 - Ask the user before installing optional dependencies, and install them only when the user explicitly needs that capability.
 - Prefer deterministic CLI checks over assumptions.

@@ -92,13 +92,27 @@ Prepares a stable Appium XCUITest execution environment on macOS by validating N
    ```bash
    appium server
    ```
-   In another terminal:
+   Keep this server process running in Terminal A.
+   In Terminal B, run:
    ```bash
    curl -s http://127.0.0.1:4723/status
    ```
+   First confirm `/status` responds successfully from `curl`.
+   Then confirm readiness from server logs and ensure the `Available drivers:` block contains `xcuitest` (for example: `- xcuitest@10.23.3 (automationName 'XCUITest')`).
    If using local Appium install:
    ```bash
    npx appium server
+   ```
+   Keep this server process running in Terminal A.
+   In Terminal B, run:
+   ```bash
+   curl -s http://127.0.0.1:4723/status
+   ```
+   After smoke validation, clean up the running Appium server:
+   - In Terminal A, stop the server with `Ctrl+C`.
+   - Verify no leftover Appium server process (Terminal B):
+   ```bash
+   pgrep -fl "appium.*server" || echo "no appium server process"
    ```
 
 9. **Agent completion criteria**
@@ -108,7 +122,10 @@ Prepares a stable Appium XCUITest execution environment on macOS by validating N
    - at least one Appium npm command mode works (`appium` or `npx appium`)
    - `appium driver doctor xcuitest` has no failing mandatory checks
    - `xcrun simctl list devices` returns available simulator targets
-   - Appium status endpoint responds successfully
+   - `curl -s http://127.0.0.1:4723/status` returns a successful status response
+   - Appium server logs show startup/readiness successfully after the curl check
+   - Appium server logs include `Available drivers:` with an `xcuitest` entry
+   - Appium smoke-test server process is cleanly stopped after validation
 
 ## Constraints
 - This skill is macOS-only; do not provide Linux/Windows alternatives.
