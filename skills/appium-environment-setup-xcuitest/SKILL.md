@@ -73,11 +73,8 @@ Prepares a stable Appium XCUITest execution environment on macOS by validating N
    ```
    Ensure at least one available iOS runtime and bootable simulator device exist.
 
-6. **Install helper tools used in iOS automation workflows**
-   ```bash
-   brew install libimobiledevice ios-deploy
-   ```
-   If Homebrew is unavailable, stop and ask the user how they want to manage packages.
+6. **Optional helper tools**
+   Install additional iOS helper tools only if the user explicitly requests capabilities that require them.
 
 7. **Run Appium doctor for XCUITest and fix in a loop**
    ```bash
