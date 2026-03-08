@@ -18,6 +18,7 @@ Prepares a stable Appium XCUITest execution environment on macOS by validating N
 - If npm health checks fail (`npm doctor`, `npm ping`): resolve npm environment issues before driver setup.
 - If Appium CLI or `xcuitest` driver is missing: install them via Appium CLI.
 - If global npm install is blocked: install Appium locally and use `npx appium` commands.
+- If install returns "already installed", ignore the error and continue (or run driver update).
 - If `appium driver doctor xcuitest` reports missing dependencies: fix each reported dependency and re-run doctor.
 - If iOS simulator runtime is unavailable: install at least one simulator runtime and retry validation.
 
@@ -39,14 +40,15 @@ Prepares a stable Appium XCUITest execution environment on macOS by validating N
 2. **Install Appium npm command (global or local fallback) and XCUITest driver**
    ```bash
    npm install -g appium
-   if appium driver list --installed | grep -q "xcuitest"; then appium driver update xcuitest; else appium driver install xcuitest; fi
+   appium driver install xcuitest || appium driver update xcuitest
    appium driver list --installed
    ```
+   If the install command fails only because `xcuitest` is already installed, continue and do not stop preparation.
    If global install is restricted, use local install:
    ```bash
    npm init -y
    npm install --save-dev appium
-   if npx appium driver list --installed | grep -q "xcuitest"; then npx appium driver update xcuitest; else npx appium driver install xcuitest; fi
+   npx appium driver install xcuitest || npx appium driver update xcuitest
    npx appium driver list --installed
    ```
 

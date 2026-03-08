@@ -19,6 +19,7 @@ Prepares a reliable Appium UiAutomator2 execution environment by installing Node
 - If global npm install is blocked: install Appium locally and use `npx appium` commands.
 - If Android SDK prerequisites are missing (`adb`, emulator binary, SDK packages): run `appium-android-environment-setup` first.
 - If the `uiautomator2` driver is not installed: install it via Appium CLI.
+- If install returns "already installed", ignore the error and continue (or run driver update).
 - If `appium driver doctor uiautomator2` reports missing dependencies: resolve each missing item and re-run doctor.
 
 ## Instructions
@@ -38,14 +39,15 @@ Prepares a reliable Appium UiAutomator2 execution environment by installing Node
 2. **Install Appium npm command (global or local fallback)**
    ```bash
    npm install -g appium
-   appium driver install uiautomator2
+   appium driver install uiautomator2 || appium driver update uiautomator2
    appium driver list --installed
    ```
+   If the install command fails only because `uiautomator2` is already installed, continue and do not stop preparation.
    If global install is not allowed, use project-local installation:
    ```bash
    npm init -y
    npm install --save-dev appium
-   npx appium driver install uiautomator2
+   npx appium driver install uiautomator2 || npx appium driver update uiautomator2
    npx appium driver list --installed
    ```
 
