@@ -2,6 +2,8 @@
 
 This repository contains AI Agent skills for preparing Appium driver environments.
 
+NOTE: This repository is currently in development.
+
 ## Available Skills
 
 | Skill | Description |
