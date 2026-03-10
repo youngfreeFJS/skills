@@ -8,8 +8,8 @@ NOTE: This repository is currently in development.
 
 | Skill | Description |
 |---|---|
-| [node-environment-setup](skills/node-environment-setup/SKILL.md) | Prepares Node.js and npm environment |
-| [android-environment-setup](skills/android-environment-setup/SKILL.md) | Prepares Android SDK, Java, and ADB prerequisites for Appium Android drivers |
+| [environment-setup-node](skills/environment-setup-node/SKILL.md) | Prepares Node.js and npm environment |
+| [environment-setup-android](skills/environment-setup-android/SKILL.md) | Prepares Android SDK, Java, and ADB prerequisites for Appium Android drivers |
 | [environment-setup-ffmpeg](skills/environment-setup-ffmpeg/SKILL.md) | Optional shared FFmpeg setup for media-related capabilities across drivers |
 | [environment-setup-bundletool](skills/environment-setup-bundletool/SKILL.md) | Optional shared bundletool.jar setup for UiAutomator2/Espresso app-bundle tooling |
 | [environment-setup-uiautomator2](skills/environment-setup-uiautomator2/SKILL.md) | Prepares and validates an Android + UiAutomator2 Appium environment |

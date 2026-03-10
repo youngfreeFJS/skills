@@ -1,11 +1,11 @@
 ---
-name: "android-environment-setup"
+name: "environment-setup-android"
 description: "Prepare and validate Android SDK, Java, and device tooling for Appium Android drivers"
 metadata:
-  last_modified: "Mon, 09 Mar 2026 12:10:00 GMT"
+  last_modified: "Mon, 09 Mar 2026 14:30:00 GMT"
 
 ---
-# android-environment-setup
+# environment-setup-android
 
 ## Goal
 Prepares a working Android automation environment for Appium by validating Java, Android SDK command-line tools, required SDK packages, environment variables, and ADB device visibility, with a verify-and-fix loop until all mandatory checks pass.

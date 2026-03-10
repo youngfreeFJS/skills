@@ -1,11 +1,11 @@
 ---
-name: "node-environment-setup"
+name: "environment-setup-node"
 description: "Prepare and validate Node.js and npm environment"
 metadata:
-  last_modified: "Sun, 08 Mar 2026 07:00:00 GMT"
+   last_modified: "Mon, 09 Mar 2026 14:30:00 GMT"
 
 ---
-# node-environment-setup
+# environment-setup-node
 
 ## Goal
 Prepares a stable Node.js and npm environment by validating the active Node runtime, confirming npm availability, and checking basic npm connectivity and health diagnostics.
