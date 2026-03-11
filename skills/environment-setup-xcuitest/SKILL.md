@@ -2,7 +2,7 @@
 name: "environment-setup-xcuitest"
 description: "Set up and validate an XCUITest Appium environment on macOS"
 metadata:
-  last_modified: "Mon, 09 Mar 2026 13:10:00 GMT"
+  last_modified: "Tue, 11 Mar 2026 19:35:00 GMT"
 
 ---
 # appium-xcuitest-environment-setup
@@ -20,6 +20,9 @@ Prepares a stable Appium XCUITest execution environment on macOS by validating N
 - If the user explicitly requests media features that require FFmpeg: run `environment-setup-ffmpeg` before final validation.
 - If install returns "already installed", ignore the error and continue (or run driver update).
 - If `appium driver doctor xcuitest` reports missing dependencies: fix each reported dependency and re-run doctor.
+- If Xcode 15+ is detected: verify iOS 17+ SDK availability and apply Xcode 15+ specific configurations.
+- If host is Apple Silicon (ARM64): enable Rosetta 2 compatibility and use native ARM64 toolchain for optimal performance.
+- If testing iOS 17+ apps: verify Privacy Manifest requirements and new permission configurations.
 
 ## Instructions
 1. **Prepare Node.js + npm environment on macOS**
@@ -71,6 +74,54 @@ Prepares a stable Appium XCUITest execution environment on macOS by validating N
    sudo xcodebuild -license accept
    xcodebuild -runFirstLaunch
    ```
+   
+   **Xcode 15+ specific configuration**:
+   ```bash
+   # Detect Xcode version
+   XCODE_VERSION=$(xcodebuild -version | head -n 1 | awk '{print $2}')
+   XCODE_MAJOR=$(echo $XCODE_VERSION | cut -d. -f1)
+   
+   if [ "$XCODE_MAJOR" -ge 15 ]; then
+     echo "Detected Xcode 15+, applying iOS 17+ configurations..."
+     
+     # Verify iOS 17 SDK availability
+     xcodebuild -showsdks | grep "iOS 17"
+     
+     # List available iOS simulators
+     xcrun simctl list runtimes | grep iOS
+     
+     # Verify minimum macOS version (Xcode 15 requires macOS 13.5+)
+     sw_vers
+   fi
+   ```
+
+4.5. **Apple Silicon optimization configuration**
+   On Apple Silicon (M1/M2/M3) Macs, optimize for native performance:
+   ```bash
+   # Detect Apple Silicon architecture
+   if [ "$(uname -m)" = "arm64" ]; then
+     echo "Apple Silicon detected, enabling native ARM64 toolchain..."
+     
+     # Verify Rosetta 2 installation (for x86_64 compatibility if needed)
+     if ! /usr/bin/pgrep oahd >/dev/null 2>&1; then
+       echo "Installing Rosetta 2 for x86_64 compatibility..."
+       softwareupdate --install-rosetta --agree-to-license
+     fi
+     
+     # Verify native ARM64 Xcode toolchain
+     xcode-select --print-path
+     arch -arm64 xcodebuild -version
+     
+     # Check available architectures
+     lipo -info /usr/bin/xcodebuild
+   fi
+   ```
+   
+   Apple Silicon performance tips:
+   - iOS Simulator runs natively on ARM64 with excellent performance
+   - Use native ARM64 builds for all development tools
+   - Rosetta 2 is only needed for legacy x86_64 dependencies
+   - Native ARM64 compilation is significantly faster than Rosetta translation
 
 5. **Optional helper tools**
    Install additional iOS helper tools only if the user explicitly requests capabilities that require them.
@@ -81,6 +132,31 @@ Prepares a stable Appium XCUITest execution environment on macOS by validating N
    appium driver doctor xcuitest
    ```
    Resolve each failing mandatory check, then re-run until the doctor output is clean.
+
+6.5. **iOS 17+ specific checks**
+   For iOS 17+ testing, verify additional requirements:
+   ```bash
+   # Check iOS 17+ SDK availability
+   xcodebuild -showsdks | grep -E "iOS 17|iOS 18"
+   
+   # List iOS 17+ simulators
+   xcrun simctl list devices | grep -E "iOS 17|iOS 18"
+   
+   # Verify Privacy Manifest support (required for iOS 17+)
+   # Privacy Manifest (PrivacyInfo.xcprivacy) is required for apps using certain APIs
+   # Check if your app includes PrivacyInfo.xcprivacy in the bundle
+   
+   # iOS 17+ introduces new privacy requirements:
+   # - Required Reason API usage must be declared
+   # - Third-party SDK signatures required
+   # - Enhanced privacy manifests for tracking domains
+   ```
+   
+   Note: iOS 17+ Privacy Manifest requirements:
+   - Apps using certain APIs (e.g., file timestamps, system boot time, disk space) must declare usage reasons
+   - Privacy-impacting SDKs must include signatures
+   - Tracking domains must be declared in privacy manifests
+   - See: https://developer.apple.com/documentation/bundleresources/privacy_manifest_files
 
 7. **Start Appium server smoke test**
    ```bash
@@ -120,3 +196,6 @@ Prepares a stable Appium XCUITest execution environment on macOS by validating N
 - Do not skip Xcode license and first-launch checks.
 - If privileged commands are required, pause and provide the exact command for user execution.
 - Do not report readiness until doctor and smoke tests pass.
+- **Xcode 15+ Requirements**: Xcode 15 requires macOS 13.5 (Ventura) or later. Verify system compatibility before installation.
+- **iOS 17+ Privacy Manifest**: Apps targeting iOS 17+ must include Privacy Manifest (PrivacyInfo.xcprivacy) for certain API usage. Declare Required Reason APIs and tracking domains as needed.
+- **Apple Silicon Optimization**: On M1/M2/M3 Macs, iOS Simulator runs natively with superior performance. Use native ARM64 toolchain (`arch -arm64`) for all development tasks. Rosetta 2 is only needed for legacy x86_64 dependencies.

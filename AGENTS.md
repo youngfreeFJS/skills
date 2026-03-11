@@ -33,6 +33,21 @@ This file defines how AI agents should execute the skills in this repository.
 2. `environment-setup-android`
 3. `environment-setup-espresso`
 
+### Chrome/Chromium Browser
+
+1. `environment-setup-node`
+2. `environment-setup-chromium`
+
+### Safari Browser (macOS/iOS)
+
+1. `environment-setup-node`
+2. `environment-setup-safari`
+
+### macOS Application Automation (Mac2)
+
+1. `environment-setup-node`
+2. `environment-setup-mac2`
+
 ### Shared Optional Skill
 
 1. `environment-setup-ffmpeg` (run only when user explicitly requests FFmpeg-related capabilities)
@@ -94,6 +109,83 @@ Rules:
   1) Start Appium server in Terminal A (`appium server`) and keep it running.
   2) In Terminal B run `curl -s http://127.0.0.1:4723/status` and confirm success.
   3) In Terminal A logs confirm `Available drivers:` contains `espresso`.
+  4) In Terminal A stop Appium with `Ctrl+C`, then in Terminal B run `pgrep -fl "appium.*server" || echo "no appium server process"`.
+```
+
+### Template: Chromium
+
+Use this as a starting prompt for an AI agent:
+
+```text
+Use this repository's skills to prepare Chrome/Chromium browser automation.
+Follow exactly, in order:
+1) skills/environment-setup-node/SKILL.md
+2) skills/environment-setup-chromium/SKILL.md
+
+Rules:
+- Run one step at a time.
+- Treat `appium driver doctor chromium` required fixes as blocking.
+- Optional warnings are non-blocking.
+- Ask before installing optional dependencies.
+- Do not use sudo unless I explicitly ask.
+- Show command output for each step.
+- Smoke test sequence:
+  1) Start Appium server in Terminal A (`appium server`) and keep it running.
+  2) In Terminal B run `curl -s http://127.0.0.1:4723/status` and confirm success.
+  3) In Terminal A logs confirm `Available drivers:` contains `chromium`.
+  4) In Terminal A stop Appium with `Ctrl+C`, then in Terminal B run `pgrep -fl "appium.*server" || echo "no appium server process"`.
+```
+
+### Template: Safari
+
+Use this as a starting prompt for an AI agent:
+
+```text
+Use this repository's skills to prepare Safari browser automation on macOS/iOS.
+Follow exactly, in order:
+1) skills/environment-setup-node/SKILL.md
+2) skills/environment-setup-safari/SKILL.md
+
+Rules:
+- Run one step at a time.
+- Treat `appium driver doctor safari` required fixes as blocking.
+- Optional warnings are non-blocking.
+- Run `safaridriver --enable` with administrator password (mandatory one-time setup).
+- For iOS Real Device: manually enable Remote Automation in Settings → Safari → Advanced.
+- Ask before installing optional dependencies.
+- Do not use sudo unless I explicitly ask.
+- Show command output for each step.
+- Smoke test sequence:
+  1) Start Appium server in Terminal A (`appium server`) and keep it running.
+  2) In Terminal B run `curl -s http://127.0.0.1:4723/status` and confirm success.
+  3) In Terminal A logs confirm `Available drivers:` contains `safari`.
+  4) In Terminal A stop Appium with `Ctrl+C`, then in Terminal B run `pgrep -fl "appium.*server" || echo "no appium server process"`.
+```
+
+### Template: Mac2
+
+Use this as a starting prompt for an AI agent:
+
+```text
+Use this repository's skills to prepare macOS application automation with Mac2.
+Follow exactly, in order:
+1) skills/environment-setup-node/SKILL.md
+2) skills/environment-setup-mac2/SKILL.md
+
+Rules:
+- Run one step at a time.
+- Treat `appium driver doctor mac2` required fixes as blocking.
+- Optional warnings are non-blocking.
+- Requires macOS 11+ and Xcode 13+.
+- Manually enable Xcode Helper Accessibility access (drag & drop to System Preferences).
+- xcode-select must point to Xcode.app/Contents/Developer.
+- Ask before installing optional dependencies.
+- Do not use sudo unless I explicitly ask.
+- Show command output for each step.
+- Smoke test sequence:
+  1) Start Appium server in Terminal A (`appium server`) and keep it running.
+  2) In Terminal B run `curl -s http://127.0.0.1:4723/status` and confirm success.
+  3) In Terminal A logs confirm `Available drivers:` contains `mac2`.
   4) In Terminal A stop Appium with `Ctrl+C`, then in Terminal B run `pgrep -fl "appium.*server" || echo "no appium server process"`.
 ```
 

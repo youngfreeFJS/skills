@@ -2,7 +2,7 @@
 name: "environment-setup-android"
 description: "Prepare and validate Android SDK, Java, and device tooling for Appium Android drivers"
 metadata:
-  last_modified: "Mon, 09 Mar 2026 14:30:00 GMT"
+  last_modified: "Tue, 11 Mar 2026 19:35:00 GMT"
 
 ---
 # environment-setup-android
@@ -26,6 +26,9 @@ Prepares a working Android automation environment for Appium by validating Java,
 - Use host-optimized emulator architecture (native architecture first, then fallback architecture).
 - Skip step 7 emulator preparation if at least one device is already connected or at least one emulator instance already exists.
 - If required SDK packages are missing: install them and re-run checks.
+- If testing apps targeting Android 13+ (API 33+): configure runtime permissions including POST_NOTIFICATIONS.
+- If Gradle version incompatibility detected: verify Gradle and Android Gradle Plugin (AGP) compatibility matrix.
+- If host is Apple Silicon (ARM64): prioritize ARM64 emulator images and enable hardware acceleration for optimal performance.
 
 ## Instructions
 1. **Detect OS and validate Java/base tooling**
@@ -166,6 +169,40 @@ Prepares a working Android automation environment for Appium by validating Java,
    if (Get-Command sdkmanager.bat -ErrorAction SilentlyContinue) { sdkmanager.bat "platform-tools" "build-tools;34.0.0" "platforms;android-34" "emulator" }
    ```
 
+5.5. **Verify Gradle compatibility (for Android app projects)**
+   If working with an Android app project, verify Gradle and AGP compatibility:
+   macOS/Linux:
+   ```bash
+   # Check Gradle version in project
+   if [ -f "gradle/wrapper/gradle-wrapper.properties" ]; then
+     echo "Gradle wrapper configuration:"
+     grep "distributionUrl" gradle/wrapper/gradle-wrapper.properties
+   fi
+   
+   # Check Gradle version if gradlew exists
+   if [ -f "./gradlew" ]; then
+     ./gradlew --version
+   fi
+   
+   # Verify AGP compatibility
+   # AGP 8.x requires Gradle 8.0+
+   # AGP 7.x requires Gradle 7.0+
+   # AGP 4.2+ requires Gradle 6.7.1+
+   ```
+   Windows PowerShell:
+   ```powershell
+   # Check Gradle version in project
+   if (Test-Path "gradle\wrapper\gradle-wrapper.properties") {
+     Write-Host "Gradle wrapper configuration:"
+     Select-String -Path "gradle\wrapper\gradle-wrapper.properties" -Pattern "distributionUrl"
+   }
+   
+   # Check Gradle version if gradlew.bat exists
+   if (Test-Path ".\gradlew.bat") {
+     .\gradlew.bat --version
+   }
+   ```
+
 6. **Verify Android SDK and ADB state**
    macOS/Linux:
    ```bash
@@ -180,6 +217,35 @@ Prepares a working Android automation environment for Appium by validating Java,
    adb.exe version
    Test-Path "$env:ANDROID_HOME\emulator\emulator.exe"
    ```
+
+6.5. **Configure Android 13+ runtime permissions (if testing API 33+ apps)**
+   For apps targeting Android 13 (API 33) or higher, configure runtime permissions:
+   macOS/Linux:
+   ```bash
+   # Check connected device/emulator API level
+   adb shell getprop ro.build.version.sdk
+   
+   # For API 33+, grant POST_NOTIFICATIONS permission if needed
+   # Replace <package> with your app's package name
+   # adb shell pm grant <package> android.permission.POST_NOTIFICATIONS
+   
+   # List all runtime permissions for a package
+   # adb shell dumpsys package <package> | grep permission
+   ```
+   Windows PowerShell:
+   ```powershell
+   # Check connected device/emulator API level
+   adb.exe shell getprop ro.build.version.sdk
+   
+   # For API 33+, grant POST_NOTIFICATIONS permission if needed
+   # Replace <package> with your app's package name
+   # adb.exe shell pm grant <package> android.permission.POST_NOTIFICATIONS
+   ```
+   
+   Note: Android 13+ introduced new runtime permissions including:
+   - `POST_NOTIFICATIONS` for notification posting
+   - Granular media permissions (`READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO`, `READ_MEDIA_AUDIO`)
+   - `NEARBY_WIFI_DEVICES` for Wi-Fi device discovery
 
 7. **Optional emulator instance preparation (if no physical device is connected and no emulator exists)**
    Skip step 7 when either of the following is true:
@@ -238,6 +304,34 @@ Prepares a working Android automation environment for Appium by validating Java,
    if (Get-Command sdkmanager.bat -ErrorAction SilentlyContinue) { sdkmanager.bat --list | Select-String "system-images;android-" | Select-Object -First 20 }
    ```
 
+7.5. **ARM64 emulator optimization (Apple Silicon Mac)**
+   On Apple Silicon (M1/M2/M3) Macs, optimize emulator performance:
+   ```bash
+   # Verify Apple Silicon architecture
+   if [ "$(uname -m)" = "arm64" ]; then
+     echo "Apple Silicon detected - ARM64 emulator optimization available"
+     
+     # Start emulator with hardware acceleration
+     # emulator @avd_name -accel on -gpu host
+     
+     # Configure memory and CPU cores for better performance
+     # emulator @avd_name -memory 4096 -cores 4
+     
+     # For maximum performance, combine options:
+     # emulator @avd_name -accel on -gpu host -memory 4096 -cores 4
+     
+     # Verify hardware acceleration is available
+     emulator -accel-check
+   fi
+   ```
+   
+   Performance tips for ARM64 emulators:
+   - Use ARM64 system images (`arm64-v8a`) for native performance
+   - Enable hardware acceleration with `-accel on`
+   - Use host GPU rendering with `-gpu host`
+   - Allocate sufficient memory (4GB recommended for modern apps)
+   - Assign multiple CPU cores based on host capabilities
+
 8. **Completion criteria**
    Mark complete only when all are true:
    - `java -version` and `javac -version` succeed
@@ -256,3 +350,6 @@ Prepares a working Android automation environment for Appium by validating Java,
 - If privileged commands are needed, pause and provide exact commands for user execution.
 - Keep Android setup independent from Appium driver installation steps.
 - Use shell-appropriate commands (`bash` for macOS/Linux, PowerShell/cmd for Windows).
+- **Gradle Compatibility**: Ensure Gradle version matches AGP requirements (AGP 8.x requires Gradle 8.0+, AGP 7.x requires Gradle 7.0+).
+- **Android 13+ Permissions**: For API 33+ apps, be aware of new runtime permissions (POST_NOTIFICATIONS, granular media permissions). Configure permissions via `adb shell pm grant` as needed.
+- **ARM64 Emulator Optimization**: On Apple Silicon Macs, prioritize ARM64 system images and enable hardware acceleration (`-accel on -gpu host`) for optimal performance. ARM64 emulators run natively and significantly outperform x86_64 emulators under Rosetta 2 translation.
